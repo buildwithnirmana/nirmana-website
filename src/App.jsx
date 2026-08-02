@@ -29,12 +29,12 @@ const Linkedin = ({ size = 24, className }) => (
 
 // REPLACE THESE WITH YOUR ACTUAL KEYS FROM FIREBASE CONSOLE
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyD8Zh5eSX61JlTl9FqA1XHaAuYTTWiBRr0",
+  authDomain: "nirmana-website.firebaseapp.com",
+  projectId: "nirmana-website",
+  storageBucket: "nirmana-website.firebasestorage.app",
+  messagingSenderId: "218083070209",
+  appId: "1:218083070209:web:ac6b238ff6f896fcb74b00"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -375,7 +375,6 @@ export default function App() {
   );
 }
 
-// --- STREAMING_CHUNK:Defining Home Component... ---
 function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
   // Removed .slice(0, 3) to show all selected projects without cutting off
   const featuredProjects = data.projects.filter(item => item.showOnHome);
@@ -565,7 +564,6 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
   );
 }
 
-// --- STREAMING_CHUNK:Defining Projects Component... ---
 function Projects({ data }) {
   const [activeTab, setActiveTab] = useState('All');
   const tabs = ['All', ...Array.from(new Set(data.projects.map(item => item.category)))];
@@ -623,7 +621,6 @@ function Projects({ data }) {
   );
 }
 
-// --- STREAMING_CHUNK:Defining About Component... ---
 function About({ data }) {
   return (
     <div className="pt-48 md:pt-56 pb-40 animate-fadeIn min-h-screen relative z-10 w-full">
@@ -667,7 +664,6 @@ function About({ data }) {
   );
 }
 
-// --- STREAMING_CHUNK:Defining Gallery Component... ---
 function Gallery({ data }) {
   const [activeTab, setActiveTab] = useState('All');
   const [selectedImgIndex, setSelectedImgIndex] = useState(null);
@@ -731,7 +727,6 @@ function Gallery({ data }) {
   );
 }
 
-// --- STREAMING_CHUNK:Defining ContactSection Component... ---
 function ContactSection({ data, updateData, showToast }) {
   return (
     <div className="py-24 md:py-40 px-6 md:px-12 max-w-7xl mx-auto relative z-10 w-full">
@@ -814,7 +809,6 @@ function ContactSection({ data, updateData, showToast }) {
   );
 }
 
-// --- STREAMING_CHUNK:Defining Admin Dashboard Component... ---
 function AdminDashboard({ data, updateData, logout, showToast }) {
   const [activeTab, setActiveTab] = useState('general');
   const [newProject, setNewProject] = useState({ name: '', desc: '', location: '', img: '', category: 'Commercial', isFeatured: false, color: 'sage' });
