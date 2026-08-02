@@ -323,7 +323,7 @@ export default function App() {
 }
 
 function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
-  const featuredProjects = data.projects.filter(item => item.showOnHome).slice(0, 3);
+  const featuredProjects = data.projects.filter(item => item.showOnHome);
   const homeGalleryImages = data.gallery.filter(item => item.showOnHome).slice(0, 4);
 
   return (
@@ -426,16 +426,16 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
             return (
               <div key={index} onClick={() => navigateTo('projects')} className="cursor-pointer group flex flex-col relative h-[450px] md:h-[550px] rounded-[3rem] md:rounded-[4rem] overflow-hidden shadow-sm hover:shadow-[0_30px_60px_rgb(0,0,0,0.06)] transition-all duration-700 hover:-translate-y-3">
                 <div className="absolute inset-0 transition-opacity duration-700 opacity-90" style={{ backgroundColor: itemBg }}></div>
-                <div className="absolute inset-3 bottom-[38%] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden">
+                <div className="absolute inset-3 bottom-[35%] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden">
                   <img src={item.img} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 h-[38%] flex flex-col justify-end bg-gradient-to-t from-white/90 via-white/50 to-transparent backdrop-blur-[2px]">
+                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 h-auto min-h-[35%] flex flex-col justify-end bg-gradient-to-t from-white/90 via-white/50 to-transparent backdrop-blur-[2px] z-10">
                    <div className="bg-white/95 backdrop-blur-xl p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white transform translate-y-3 group-hover:translate-y-0 transition-transform duration-700">
-                     <div className="flex justify-between items-start mb-4">
-                       <h4 className="text-xl md:text-2xl font-bold text-[#1A1C20] truncate pr-2">{item.name}</h4>
-                       <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-full flex-shrink-0">{item.category}</span>
+                     <div className="flex justify-between items-start mb-4 gap-3">
+                       <h4 className="text-xl md:text-2xl font-bold text-[#1A1C20]">{item.name}</h4>
+                       <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-full flex-shrink-0 mt-1">{item.category}</span>
                      </div>
-                     <p className="text-xs md:text-sm text-gray-500 font-medium flex items-center gap-2 truncate"><MapPin size={16} className="flex-shrink-0"/> {item.location}</p>
+                     <p className="text-xs md:text-sm text-gray-500 font-medium flex items-start gap-2"><MapPin size={16} className="flex-shrink-0 mt-0.5"/> <span className="line-clamp-2">{item.location}</span></p>
                    </div>
                 </div>
               </div>
