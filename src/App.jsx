@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  MapPin, Phone, Mail, Clock, Instagram, Facebook, Linkedin, 
+  MapPin, Phone, Mail, Clock, 
   Menu as MenuIcon, X, ChevronRight, Calendar, Users, 
   Building, Hammer, HardHat, ChevronLeft, ArrowRight, Settings, Plus, Trash2, 
   Image as ImageIcon, Star, Quote, Ruler, Briefcase, Sparkles, CheckCircle2, ArrowUpRight
 } from 'lucide-react';
+import { FaInstagram as Instagram, FaFacebook as Facebook, FaLinkedin as Linkedin } from "react-icons/fa";
 
 // --- ULTRA-PREMIUM PASTEL & WHITE MIX THEME ---
 const THEME = {
