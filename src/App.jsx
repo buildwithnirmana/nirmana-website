@@ -286,7 +286,7 @@ export default function App() {
             <div className="md:col-span-3 space-y-8">
               <h4 className="text-[10px] font-bold tracking-[0.25em] uppercase text-gray-500 mb-10">Headquarters</h4>
               <ul className="space-y-6 text-sm text-gray-300 font-light">
-                <li className="flex items-start gap-5"><MapPin size={20} className="text-gray-500 mt-0.5 flex-shrink-0"/> <span className="leading-relaxed">{siteData.contact.address}</span></li>
+                <li className="flex items-start gap-5"><MapPin size={20} className="text-gray-500 mt-0.5 flex-shrink-0"/> <span className="leading-relaxed whitespace-normal break-words">{siteData.contact.address}</span></li>
                 <li className="flex items-center gap-5"><Phone size={20} className="text-gray-500"/> <span>{siteData.contact.phone}</span></li>
                 <li className="flex items-center gap-5"><Mail size={20} className="text-gray-500"/> <span className="break-all">{siteData.contact.email}</span></li>
               </ul>
@@ -322,7 +322,9 @@ export default function App() {
   );
 }
 
+// --- STREAMING_CHUNK:Defining Home Component... ---
 function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
+  // Removed .slice(0, 3) to show all selected projects without cutting off
   const featuredProjects = data.projects.filter(item => item.showOnHome);
   const homeGalleryImages = data.gallery.filter(item => item.showOnHome).slice(0, 4);
 
@@ -426,16 +428,27 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
             return (
               <div key={index} onClick={() => navigateTo('projects')} className="cursor-pointer group flex flex-col relative h-[450px] md:h-[550px] rounded-[3rem] md:rounded-[4rem] overflow-hidden shadow-sm hover:shadow-[0_30px_60px_rgb(0,0,0,0.06)] transition-all duration-700 hover:-translate-y-3">
                 <div className="absolute inset-0 transition-opacity duration-700 opacity-90" style={{ backgroundColor: itemBg }}></div>
+                
+                {/* Image and Top-Left Tag Layer */}
                 <div className="absolute inset-3 bottom-[35%] rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden">
                   <img src={item.img} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
+                  <div className="absolute top-5 left-5 md:top-6 md:left-6 z-20">
+                    <span className="bg-white/95 backdrop-blur-md text-[#1A1C20] px-4 md:px-5 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] shadow-sm border border-gray-100">
+                      {item.category}
+                    </span>
+                  </div>
                 </div>
+
+                {/* Text Block Layer without truncation */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 h-auto min-h-[35%] flex flex-col justify-end bg-gradient-to-t from-white/90 via-white/50 to-transparent backdrop-blur-[2px] z-10">
                    <div className="bg-white/95 backdrop-blur-xl p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white transform translate-y-3 group-hover:translate-y-0 transition-transform duration-700">
-                     <div className="flex justify-between items-start mb-4 gap-3">
-                       <h4 className="text-xl md:text-2xl font-bold text-[#1A1C20]">{item.name}</h4>
-                       <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-500 bg-gray-50 border border-gray-100 px-3 py-1.5 rounded-full flex-shrink-0 mt-1">{item.category}</span>
+                     <div className="flex flex-col mb-4 gap-2">
+                       <h4 className="text-xl md:text-2xl font-bold text-[#1A1C20] whitespace-normal break-words">{item.name}</h4>
                      </div>
-                     <p className="text-xs md:text-sm text-gray-500 font-medium flex items-start gap-2"><MapPin size={16} className="flex-shrink-0 mt-0.5"/> <span className="line-clamp-2">{item.location}</span></p>
+                     <p className="text-xs md:text-sm text-gray-500 font-medium flex items-start gap-2">
+                       <MapPin size={16} className="flex-shrink-0 mt-0.5"/> 
+                       <span className="whitespace-normal break-words">{item.location}</span>
+                     </p>
                    </div>
                 </div>
               </div>
@@ -456,7 +469,7 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
             </div>
             <div className="grid grid-cols-2 gap-4 md:gap-6">
               {homeGalleryImages.map((img, i) => (
-                <div key={i} className="relative rounded-[2rem] md:rounded-[2.5rem] overflow-hidden h-40 md:h-48 group cursor-pointer shadow-sm" onClick={() => navigateTo('gallery')}>
+                <div key={i} className="relative rounded-[2rem] md:rounded-[2.5rem] overflow-hidden h-36 md:h-48 group cursor-pointer shadow-sm border border-gray-100" onClick={() => navigateTo('gallery')}>
                   <img src={img.src} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt="Jobsite" />
                   <div className="absolute inset-0 bg-[#1A1C20]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center backdrop-blur-[2px]">
                     <div className="bg-white/90 p-3 rounded-full"><Plus className="text-[#1A1C20]" size={20} /></div>
@@ -500,6 +513,7 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
   );
 }
 
+// --- STREAMING_CHUNK:Defining Projects Component... ---
 function Projects({ data }) {
   const [activeTab, setActiveTab] = useState('All');
   const tabs = ['All', ...Array.from(new Set(data.projects.map(item => item.category)))];
@@ -531,15 +545,23 @@ function Projects({ data }) {
             <div className="relative h-[350px] md:h-[450px] overflow-hidden p-3 md:p-4">
                <img src={item.img} alt={item.name} className="w-full h-full object-cover rounded-[2.5rem] md:rounded-[3.5rem] group-hover:scale-105 transition-transform duration-1000" />
                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[3.5rem]"></div>
-               {item.isFeatured && <div className="absolute top-8 right-8 md:top-10 md:right-10"><span className="bg-white/95 backdrop-blur-md px-4 md:px-5 py-2 md:py-2.5 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-2 shadow-sm border border-gray-100"><Star size={12} className="text-[#1A1C20]"/> Featured</span></div>}
-               <div className="absolute bottom-8 left-8 md:bottom-10 md:left-10"><span className="bg-[#1A1C20]/95 text-white backdrop-blur-md px-4 md:px-5 py-2 md:py-2.5 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] shadow-xl">{item.category}</span></div>
+               
+               {/* Category Tag Moved to Top Left */}
+               <div className="absolute top-8 left-8 md:top-10 md:left-10 z-20">
+                 <span className="bg-white/95 text-[#1A1C20] backdrop-blur-md px-4 md:px-5 py-2 md:py-2.5 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] shadow-xl border border-gray-100">
+                   {item.category}
+                 </span>
+               </div>
+
+               {/* Featured Tag (If applicable) remains Top Right */}
+               {item.isFeatured && <div className="absolute top-8 right-8 md:top-10 md:right-10 z-20"><span className="bg-[#1A1C20]/95 text-white backdrop-blur-md px-4 md:px-5 py-2 md:py-2.5 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] flex items-center gap-2 shadow-sm"><Star size={12} className="text-white"/> Featured</span></div>}
             </div>
             <div className="p-8 md:p-12 flex-1 flex flex-col">
-              <h3 className="text-3xl md:text-4xl font-bold text-[#1A1C20] mb-4 md:mb-5 tracking-tight">{item.name}</h3>
+              <h3 className="text-3xl md:text-4xl font-bold text-[#1A1C20] mb-4 md:mb-5 tracking-tight whitespace-normal break-words">{item.name}</h3>
               <div className="flex items-center gap-3 text-gray-500 text-xs md:text-sm font-medium mb-6 md:mb-8 pb-6 md:pb-8 border-b border-gray-100">
-                <MapPin size={18} /> {item.location}
+                <MapPin size={18} className="flex-shrink-0" /> <span className="whitespace-normal break-words">{item.location}</span>
               </div>
-              <p className="text-gray-600 font-light leading-relaxed flex-1 text-base md:text-lg">{item.desc}</p>
+              <p className="text-gray-600 font-light leading-relaxed flex-1 text-base md:text-lg whitespace-normal break-words">{item.desc}</p>
             </div>
           </div>
         ))}
@@ -549,6 +571,7 @@ function Projects({ data }) {
   );
 }
 
+// --- STREAMING_CHUNK:Defining About Component... ---
 function About({ data }) {
   return (
     <div className="pt-48 md:pt-56 pb-40 animate-fadeIn min-h-screen relative z-10 w-full">
@@ -592,6 +615,7 @@ function About({ data }) {
   );
 }
 
+// --- STREAMING_CHUNK:Defining Gallery Component... ---
 function Gallery({ data }) {
   const [activeTab, setActiveTab] = useState('All');
   const [selectedImgIndex, setSelectedImgIndex] = useState(null);
@@ -655,6 +679,7 @@ function Gallery({ data }) {
   );
 }
 
+// --- STREAMING_CHUNK:Defining ContactSection Component... ---
 function ContactSection({ data, updateData, showToast }) {
   return (
     <div className="py-24 md:py-40 px-6 md:px-12 max-w-7xl mx-auto relative z-10 w-full">
@@ -737,6 +762,7 @@ function ContactSection({ data, updateData, showToast }) {
   );
 }
 
+// --- STREAMING_CHUNK:Defining Admin Dashboard Component... ---
 function AdminDashboard({ data, updateData, logout, showToast }) {
   const [activeTab, setActiveTab] = useState('general');
   const [newProject, setNewProject] = useState({ name: '', desc: '', location: '', img: '', category: 'Commercial', isFeatured: false, color: 'sage' });
@@ -882,7 +908,7 @@ function AdminDashboard({ data, updateData, logout, showToast }) {
                       <input type="checkbox" checked={newProject.isFeatured} onChange={e=>setNewProject({...newProject, isFeatured: e.target.checked})} className="w-5 h-5 md:w-6 md:h-6 accent-[#1A1C20] rounded" /> 
                       <span className="font-bold text-gray-500 text-[10px] md:text-[11px] uppercase tracking-[0.2em]">Highlight on Home Page</span>
                     </label>
-                    <button type="submit" className="md:col-span-2 py-5 md:py-6 bg-[#1A1C20] hover:bg-gray-800 text-white rounded-full font-bold uppercase tracking-[0.2em] text-[10px] md:text-[11px] shadow-[0_10px_20px_rgb(26,28,32,0.2)] transition-transform duration-500 hover:-translate-y-1 mt-2 md:mt-4">Publish Project</button>
+                    <button type="submit" className="md:col-span-2 py-5 md:py-6 bg-[#1A1C20] text-white rounded-full font-bold uppercase tracking-[0.2em] text-[10px] md:text-[11px] shadow-[0_10px_20px_rgb(26,28,32,0.2)] transition-transform duration-500 hover:-translate-y-1 mt-2 md:mt-4">Publish Project</button>
                  </form>
                </section>
                <section>
@@ -893,13 +919,13 @@ function AdminDashboard({ data, updateData, logout, showToast }) {
                        <img src={item.img} alt={item.name} className="w-full sm:w-40 h-48 sm:h-40 object-cover rounded-[2.5rem] md:rounded-[3rem]" />
                        <div className="flex-1 text-center sm:text-left px-2 md:px-4">
                          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 md:gap-4 mb-2 md:mb-3">
-                           <h4 className="font-bold text-[#1A1C20] text-xl md:text-2xl">{item.name}</h4>
+                           <h4 className="font-bold text-[#1A1C20] text-xl md:text-2xl whitespace-normal break-words">{item.name}</h4>
                            <span className="text-[8px] md:text-[9px] font-bold uppercase bg-white border border-gray-100 shadow-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full text-gray-500 tracking-[0.2em]">{item.category}</span>
                            {item.isFeatured && <span className="text-[8px] md:text-[9px] font-bold uppercase bg-[#1A1C20] text-white px-3 md:px-4 py-1.5 md:py-2 rounded-full flex items-center gap-2 tracking-[0.2em] shadow-sm"><Star size={12}/> Featured</span>}
                          </div>
-                         <p className="text-sm md:text-base text-gray-500 font-light line-clamp-2 md:line-clamp-none md:truncate max-w-xl">{item.desc}</p>
+                         <p className="text-sm md:text-base text-gray-500 font-light whitespace-normal break-words">{item.desc}</p>
                        </div>
-                       <div className="flex items-center gap-4 md:gap-6 bg-white p-4 md:p-5 rounded-[2.5rem] md:rounded-[3rem] shadow-sm border border-gray-50 w-full sm:w-auto justify-center">
+                       <div className="flex items-center gap-4 md:gap-6 bg-white p-4 md:p-5 rounded-[2.5rem] md:rounded-[3rem] shadow-sm border border-gray-50 w-full sm:w-auto justify-center flex-shrink-0">
                          <label className="flex items-center gap-2 md:gap-3 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] cursor-pointer text-gray-500"><input type="checkbox" checked={item.showOnHome} onChange={() => toggleProjectHome(item.id)} className="w-4 h-4 md:w-5 md:h-5 accent-[#1A1C20] rounded" /> Home</label>
                          <div className="w-[1px] h-8 md:h-10 bg-gray-200"></div>
                          <button onClick={() => deleteProject(item.id)} className="p-3 md:p-4 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"><Trash2 size={18}/></button>
