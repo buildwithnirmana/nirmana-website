@@ -6,6 +6,10 @@ import {
   Image as ImageIcon, Star, Quote, Ruler, Briefcase, Sparkles, CheckCircle2, ArrowUpRight
 } from 'lucide-react';
 
+// --- FIREBASE IMPORTS MUST BE AT THE VERY TOP ---
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
+
 // --- CUSTOM ICONS TO AVOID PACKAGE ERRORS ---
 const Instagram = ({ size = 24, className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -23,11 +27,7 @@ const Linkedin = ({ size = 24, className }) => (
   </svg>
 );
 
-// --- FIREBASE CONFIGURATION (MERGED FOR SINGLE FILE) ---
-import { initializeApp } from "firebase/app";
-import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
-
-// REPLACE THESE WITH YOUR ACTUAL KEYS FROM FIREBASE
+// REPLACE THESE WITH YOUR ACTUAL KEYS FROM FIREBASE CONSOLE
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
