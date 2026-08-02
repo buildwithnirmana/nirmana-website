@@ -23,6 +23,23 @@ const Linkedin = ({ size = 24, className }) => (
   </svg>
 );
 
+// --- FIREBASE CONFIGURATION (MERGED FOR SINGLE FILE) ---
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
+
+// REPLACE THESE WITH YOUR ACTUAL KEYS FROM FIREBASE
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 // --- ULTRA-PREMIUM PASTEL & WHITE MIX THEME ---
 const THEME = {
   colors: {
@@ -90,6 +107,44 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // --- 1. FIREBASE REAL-TIME SYNC ---
+  useEffect(() => {
+    // We store all website data in a single document called "websiteData"
+    const docRef = doc(db, "nirmana", "websiteData");
+    
+    // onSnapshot automatically updates the website the second data changes in Firebase!
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setSiteData(docSnap.data());
+      } else {
+        // First time setup: push initial data to the blank database
+        setDoc(docRef, INITIAL_DATA);
+        setSiteData(INITIAL_DATA);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // --- 2. FIREBASE SAVE FUNCTION ---
+  const syncData = async (updater) => {
+    let newData;
+    if (typeof updater === 'function') {
+      newData = updater(siteData);
+    } else {
+      newData = updater;
+    }
+    
+    setSiteData(newData); // Optimistic fast UI update
+
+    try {
+      await setDoc(doc(db, "nirmana", "websiteData"), newData);
+    } catch (error) {
+      console.error("Firebase Error:", error);
+      showToast("Failed to save to Cloud.", "error");
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -174,7 +229,6 @@ export default function App() {
         </div>
       )}
 
-      {}
       {/* Consultation Modal */}
       {isConsultationOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1A1C20]/30 backdrop-blur-xl animate-fadeIn overflow-y-auto">
@@ -249,16 +303,15 @@ export default function App() {
         </div>
       )}
 
-      {}
+      {/* Main Content Render */}
       <main className="min-h-screen relative z-10 w-full overflow-hidden">
-        {currentPage === 'home' && <Home navigateTo={navigateTo} openConsultation={() => setIsConsultationOpen(true)} data={siteData} updateData={setSiteData} showToast={showToast} />}
+        {currentPage === 'home' && <Home navigateTo={navigateTo} openConsultation={() => setIsConsultationOpen(true)} data={siteData} updateData={syncData} showToast={showToast} />}
         {currentPage === 'projects' && <Projects data={siteData} />}
         {currentPage === 'about' && <About data={siteData} />}
         {currentPage === 'gallery' && <Gallery data={siteData} />}
-        {currentPage === 'admin' && isAdmin && <AdminDashboard data={siteData} updateData={setSiteData} logout={() => { setIsAdmin(false); navigateTo('home'); showToast("Logged out securely"); }} showToast={showToast} />}
+        {currentPage === 'admin' && isAdmin && <AdminDashboard data={siteData} updateData={syncData} logout={() => { setIsAdmin(false); navigateTo('home'); showToast("Logged out securely"); }} showToast={showToast} />}
       </main>
 
-      {}
       {/* Footer */}
       {currentPage !== 'admin' && (
         <footer className="relative z-10 mt-32 pt-32 pb-16 px-6 md:px-12 bg-[#1A1C20] text-white rounded-t-[4rem] overflow-hidden">
@@ -375,7 +428,7 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
         </div>
       </div>
 
-      {}
+      {/* Modern Approach Section */}
       <div className="py-24 md:py-40 px-6 md:px-12 max-w-7xl mx-auto relative z-10 w-full">
         <div className="bg-gradient-to-br from-[#DFEAE2]/90 to-white/95 backdrop-blur-3xl rounded-[4rem] md:rounded-[5rem] p-10 md:p-24 shadow-[0_10px_40px_rgb(0,0,0,0.04)] border border-white grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-20 items-center">
           <div className="space-y-10 md:space-y-12">
@@ -408,7 +461,7 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
         </div>
       </div>
 
-      {}
+      {/* Featured Portfolio Section */}
       <div className="py-24 md:py-40 px-6 md:px-12 max-w-7xl mx-auto w-full">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 md:mb-24 space-y-8 md:space-y-0">
           <div>
@@ -458,7 +511,7 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
         </div>
       </div>
 
-      {}
+      {/* Gallery & Reviews Section */}
       <div className="py-24 md:py-40 px-6 md:px-12 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 md:gap-20 items-center">
           {/* Gallery Teaser */}
@@ -507,7 +560,6 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
         </div>
       </div>
       
-      {/* Contact Section Embedded */}
       <ContactSection data={data} updateData={updateData} showToast={showToast} />
     </div>
   );
@@ -769,13 +821,57 @@ function AdminDashboard({ data, updateData, logout, showToast }) {
   const [newGallery, setNewGallery] = useState({ src: '', category: 'Sites' });
   const [newReview, setNewReview] = useState({ author: '', role: '', rating: 5, text: '', date: 'Just now', source: 'Direct' });
 
+  // --- AUTO-COMPRESSING BASE64 IMAGE CONVERTER ---
   const handleImageUpload = (e, callback) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => callback(reader.result); 
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    showToast("Compressing image...", "success");
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Cap the maximum size to 1200px (shrinks huge phone photos)
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 1200;
+        
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = Math.round((height *= MAX_WIDTH / width));
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width = Math.round((width *= MAX_HEIGHT / height));
+            height = MAX_HEIGHT;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Compress to JPEG at 70% quality to drastically reduce file size
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+        
+        // Safety check (Base64 string length * 0.75 = rough size in bytes)
+        const sizeInBytes = compressedBase64.length * 0.75;
+        if (sizeInBytes > 950000) {
+          showToast("Image still too large after compression.", "error");
+        } else {
+          callback(compressedBase64); 
+          showToast("Image compressed & ready!", "success");
+        }
+      };
+    };
   };
 
   const handleAssetChange = (e) => updateData({ ...data, assets: { ...data.assets, [e.target.name]: e.target.value } });
