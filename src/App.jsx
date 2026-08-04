@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  MapPin, Phone, Mail, Clock, Instagram, Facebook, Linkedin, 
+  MapPin, Phone, Mail, Clock,
   Menu as MenuIcon, X, ChevronRight, Calendar, Users, 
   Building, Hammer, HardHat, ChevronLeft, ArrowRight, Settings, Plus, Trash2, 
   Image as ImageIcon, Star, Quote, Ruler, Briefcase, Sparkles, CheckCircle2, ArrowUpRight
 } from 'lucide-react';
+
+// Inline SVGs for social icons to avoid lucide-react export issues
+const InstagramIcon = ({ size }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>);
+const FacebookIcon = ({ size }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>);
+const LinkedinIcon = ({ size }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>);
 
 // --- RICHER PASTEL & WHITE MIX THEME ---
 const THEME = {
@@ -254,16 +259,16 @@ export default function App() {
                   <span className="text-3xl font-serif font-bold tracking-tight">Nirmana.</span>
                 </div>
                 <p className="text-gray-400 leading-loose text-sm max-w-sm font-light">
-                  Engineering excellence and crafting the skyline. We are your trusted architectural partner in premium commercial and residential construction.
-                </p>
-                <div className="flex space-x-4 pt-2">
-                  <a href="#" className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white transition-all duration-300"><Linkedin size={18} /></a>
-                  <a href="#" className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white transition-all duration-300"><Facebook size={18} /></a>
-                  <a href="#" className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white transition-all duration-300"><Instagram size={18} /></a>
-                </div>
+              Engineering excellence and crafting the skyline. We are your trusted architectural partner in premium commercial and residential construction.
+            </p>
+            <div className="flex space-x-4 pt-2">
+              <a href="#" className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white transition-all duration-300"><LinkedinIcon size={18} /></a>
+              <a href="#" className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white transition-all duration-300"><FacebookIcon size={18} /></a>
+              <a href="#" className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white transition-all duration-300"><InstagramIcon size={18} /></a>
             </div>
-            
-            <div className="md:col-span-3 space-y-6">
+        </div>
+        
+        <div className="md:col-span-3 space-y-6">
               <h4 className="text-[10px] font-bold tracking-[0.25em] uppercase text-gray-500 mb-6">Headquarters</h4>
               <ul className="space-y-6 text-sm text-gray-300 font-light">
                 <li className="flex items-start gap-5"><MapPin size={20} className="text-gray-500 mt-0.5 flex-shrink-0"/> <span className="leading-relaxed">{siteData.contact.address}</span></li>
