@@ -1,12 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  MapPin, Phone, Mail, Clock, 
+  MapPin, Phone, Mail, Clock,
   Menu as MenuIcon, X, ChevronRight, Calendar, Users, 
   Building, Hammer, HardHat, ChevronLeft, ArrowRight, Settings, Plus, Trash2, 
   Image as ImageIcon, Star, Quote, Ruler, Briefcase, Sparkles, CheckCircle2, ArrowUpRight
 } from 'lucide-react';
+import { initializeApp } from "firebase/app";
+import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
 
-// Inline SVGs for social icons to avoid lucide-react export issues
+// --- FIREBASE INITIALIZATION ---
+// ⚠️ PASTE YOUR EXACT FIREBASE PROJECT KEYS BELOW ⚠️
+const firebaseConfig = {
+  apiKey: "AIzaSyD8Zh5eSX61JlTl9FqA1XHaAuYTTWiBRr0",
+  authDomain: "nirmana-website.firebaseapp.com",
+  projectId: "nirmana-website",
+  storageBucket: "nirmana-website.firebasestorage.app",
+  messagingSenderId: "218083070209",
+  appId: "1:218083070209:web:ac6b238ff6f896fcb74b00"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Inline SVGs for social icons to avoid lucide-react export build issues
 const InstagramIcon = ({ size }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>);
 const FacebookIcon = ({ size }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>);
 const LinkedinIcon = ({ size }) => (<svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>);
@@ -14,15 +29,15 @@ const LinkedinIcon = ({ size }) => (<svg xmlns="http://www.w3.org/2000/svg" widt
 // --- RICHER PASTEL & WHITE MIX THEME ---
 const THEME = {
   colors: {
-    bg: '#FDFCFB',      // A very soft, warm pearl white base
-    ink: '#1A1C20',     // Deep slate for text
+    bg: '#FDFCFB',
+    ink: '#1A1C20',
     surface: '#FFFFFF', 
     pastels: {
-      sage: '#C8E0D0',  // Deepened soft sage
-      rose: '#F0D4D4',  // Deepened dusty rose
-      sky: '#CBE0F2',   // Deepened powder blue
-      lilac: '#E0D4ED', // Deepened soft lilac
-      sand: '#EBD8C3',  // Deepened warm sand
+      sage: '#C8E0D0',
+      rose: '#F0D4D4',
+      sky: '#CBE0F2',
+      lilac: '#E0D4ED',
+      sand: '#EBD8C3',
     }
   }
 };
@@ -72,11 +87,47 @@ export default function App() {
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
 
-  // Admin States
   const [showLogin, setShowLogin] = useState(false);
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // --- REAL-TIME DIRECT DATABASE SYNC ---
+  useEffect(() => {
+    const docRef = doc(db, "nirmana", "websiteData");
+    
+    // Listen for changes and update website immediately
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setSiteData(docSnap.data());
+      } else {
+        // First run: setup the database
+        setDoc(docRef, INITIAL_DATA);
+        setSiteData(INITIAL_DATA);
+      }
+    }, (error) => {
+      console.error("Firestore sync error:", error);
+      showToast("Could not connect to Cloud. Check Firebase keys and rules.", "error");
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // --- SAVE TO CLOUD FUNCTION ---
+  const syncData = async (updater) => {
+    // 1. Calculate new data
+    const newData = typeof updater === 'function' ? updater(siteData) : updater;
+    // 2. Instantly update UI for speed
+    setSiteData(newData);
+    // 3. Send to Google Cloud Database
+    try {
+      const docRef = doc(db, "nirmana", "websiteData");
+      await setDoc(docRef, newData);
+    } catch (error) {
+      console.error("Failed to save to Cloud:", error);
+      showToast("Failed to save to Cloud. Check your database rules.", "error");
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -98,14 +149,13 @@ export default function App() {
   return (
     <div className="min-h-screen font-sans antialiased selection:bg-[#1A1C20] selection:text-white overflow-x-hidden relative" style={{ backgroundColor: THEME.colors.bg, color: THEME.colors.ink }}>
       
-      {/* Ambient Premium Pastel Background Mix - Increased Opacity for pop */}
+      {/* Ambient Premium Pastel Background Mix */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-gradient-to-br from-white/20 via-transparent to-white/20">
          <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full filter blur-[100px] opacity-80 animate-pulse" style={{ backgroundColor: THEME.colors.pastels.sky, animationDuration: '10s' }}></div>
          <div className="absolute top-[20%] right-[-10%] w-[45vw] h-[45vw] rounded-full filter blur-[100px] opacity-70 animate-pulse" style={{ backgroundColor: THEME.colors.pastels.rose, animationDuration: '12s' }}></div>
          <div className="absolute bottom-[-15%] left-[15%] w-[60vw] h-[60vw] rounded-full filter blur-[110px] opacity-80 animate-pulse" style={{ backgroundColor: THEME.colors.pastels.sage, animationDuration: '15s' }}></div>
       </div>
 
-      {/* Toast Notification */}
       <div className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-[100] transition-all duration-700 ease-out ${toast.visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-12 scale-95 pointer-events-none'}`}>
         <div className={`px-8 py-5 rounded-[2.5rem] shadow-[0_20px_40px_rgb(0,0,0,0.08)] font-medium text-sm flex items-center gap-4 backdrop-blur-2xl border ${toast.type === 'error' ? 'bg-red-50/95 text-red-700 border-red-100' : 'bg-white/95 text-[#1A1C20] border-white/60'}`}>
           {toast.type === 'success' ? <CheckCircle2 size={20} className="text-[#8BA59B]" /> : <X size={20} className="text-red-500" />}
@@ -113,14 +163,13 @@ export default function App() {
         </div>
       </div>
 
-      {/* Floating Glass Navigation - Hidden on Admin Page */}
+      {/* Floating Glass Navigation */}
       {currentPage !== 'admin' && (
       <nav className={`fixed w-full z-40 transition-all duration-1000 flex justify-center ${isScrolled || currentPage !== 'home' ? 'top-6 px-4' : 'top-10 px-6 md:px-12'}`}>
         <div className={`flex items-center justify-between transition-all duration-1000 ${isScrolled || currentPage !== 'home' ? 'w-full max-w-4xl bg-white/80 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 px-6 py-4 rounded-[3rem]' : 'w-full max-w-7xl px-0 py-2'}`}>
           
           <div className="flex items-center space-x-4 cursor-pointer group" onClick={() => navigateTo('home')}>
             <div className={`flex items-center justify-center rounded-full overflow-hidden transition-all duration-700 ${isScrolled || currentPage !== 'home' ? 'h-12 w-12 bg-[#1A1C20]' : 'h-14 w-14 bg-white shadow-[0_8px_20px_rgb(0,0,0,0.04)]'}`}>
-              {/* DYNAMIC LOGO APPLIED HERE */}
               {siteData.assets.logo ? (
                 <img src={siteData.assets.logo} alt="Logo" className="w-full h-full object-cover" />
               ) : (
@@ -153,7 +202,7 @@ export default function App() {
       </nav>
       )}
 
-      {/* Mobile Menu Overlay - Hidden on Admin Page */}
+      {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && currentPage !== 'admin' && (
         <div className="fixed inset-0 z-30 bg-[#FDFCFB]/95 backdrop-blur-3xl flex flex-col items-center justify-center space-y-10 animate-fadeIn">
           {['home', 'projects', 'about', 'gallery'].map((page) => (
@@ -185,7 +234,7 @@ export default function App() {
                  e.preventDefault(); 
                  const fd = new FormData(e.target);
                  const newConsult = { id: Date.now(), date: fd.get('date'), projectType: fd.get('type'), name: fd.get('name'), phone: fd.get('phone'), status: 'Pending' };
-                 setSiteData(prev => ({ ...prev, consultations: [newConsult, ...(prev.consultations || [])] }));
+                 syncData(prev => ({ ...prev, consultations: [newConsult, ...(prev.consultations || [])] }));
                  showToast("Request Received! Our architects will contact you shortly."); 
                  setIsConsultationOpen(false); 
                }}>
@@ -241,13 +290,13 @@ export default function App() {
         </div>
       )}
 
-      {/* Main Content Rendering */}
+      {/* Main Routing Views */}
       <main className="min-h-screen relative z-10">
-        {currentPage === 'home' && <Home navigateTo={navigateTo} openConsultation={() => setIsConsultationOpen(true)} data={siteData} updateData={setSiteData} showToast={showToast} />}
+        {currentPage === 'home' && <Home navigateTo={navigateTo} openConsultation={() => setIsConsultationOpen(true)} data={siteData} updateData={syncData} showToast={showToast} />}
         {currentPage === 'projects' && <Projects data={siteData} />}
         {currentPage === 'about' && <About data={siteData} />}
         {currentPage === 'gallery' && <Gallery data={siteData} />}
-        {currentPage === 'admin' && isAdmin && <AdminDashboard data={siteData} updateData={setSiteData} logout={() => { setIsAdmin(false); navigateTo('home'); showToast("Logged out securely"); }} showToast={showToast} />}
+        {currentPage === 'admin' && isAdmin && <AdminDashboard data={siteData} updateData={syncData} logout={() => { setIsAdmin(false); navigateTo('home'); showToast("Logged out securely"); }} showToast={showToast} />}
       </main>
 
       {/* Global Footer */}
@@ -259,7 +308,6 @@ export default function App() {
             <div className="md:col-span-4 flex flex-col items-start space-y-8">
                 <div className="cursor-pointer group flex items-center space-x-4" onClick={() => setShowLogin(true)} title="Admin Access">
                   <div className="bg-white/10 backdrop-blur-md w-14 h-14 flex items-center justify-center rounded-full border border-white/5 group-hover:bg-white/20 transition-all duration-500 overflow-hidden">
-                    {/* DYNAMIC LOGO APPLIED HERE */}
                     {siteData.assets.logo ? (
                       <img src={siteData.assets.logo} alt="Logo" className="w-full h-full object-cover" />
                     ) : (
@@ -269,16 +317,16 @@ export default function App() {
                   <span className="text-3xl font-serif font-bold tracking-tight">Nirmana.</span>
                 </div>
                 <p className="text-gray-400 leading-loose text-sm max-w-sm font-light">
-              Engineering excellence and crafting the skyline. We are your trusted architectural partner in premium commercial and residential construction.
-            </p>
-            <div className="flex space-x-4 pt-2">
-              <a href="#" className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white transition-all duration-300"><LinkedinIcon size={18} /></a>
-              <a href="#" className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white transition-all duration-300"><FacebookIcon size={18} /></a>
-              <a href="#" className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white transition-all duration-300"><InstagramIcon size={18} /></a>
+                  Engineering excellence and crafting the skyline. We are your trusted architectural partner in premium commercial and residential construction.
+                </p>
+                <div className="flex space-x-4 pt-2">
+                  <a href="#" className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white transition-all duration-300"><LinkedinIcon size={18} /></a>
+                  <a href="#" className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white transition-all duration-300"><FacebookIcon size={18} /></a>
+                  <a href="#" className="p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white transition-all duration-300"><InstagramIcon size={18} /></a>
+                </div>
             </div>
-        </div>
-        
-        <div className="md:col-span-3 space-y-6">
+            
+            <div className="md:col-span-3 space-y-6">
               <h4 className="text-[10px] font-bold tracking-[0.25em] uppercase text-gray-500 mb-6">Headquarters</h4>
               <ul className="space-y-6 text-sm text-gray-300 font-light">
                 <li className="flex items-start gap-5"><MapPin size={20} className="text-gray-500 mt-0.5 flex-shrink-0"/> <span className="leading-relaxed">{siteData.contact.address}</span></li>
@@ -324,7 +372,7 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
   return (
     <div className="animate-fadeIn">
       
-      {/* Editorial Hero Section - Reduced padding below heading */}
+      {/* Editorial Hero Section */}
       <div className="relative min-h-screen flex items-center justify-center pt-32 pb-16 px-6 lg:px-12 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center w-full">
           
@@ -363,7 +411,7 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
         </div>
       </div>
 
-      {/* Modern Approach Section - Tighter spacing, richer background */}
+      {/* Modern Approach Section */}
       <div className="py-16 px-6 md:px-12 max-w-7xl mx-auto relative z-10">
         <div className="bg-gradient-to-br from-[#C8E0D0]/90 to-white/60 backdrop-blur-3xl rounded-[5rem] p-12 md:p-20 shadow-[0_10px_40px_rgb(0,0,0,0.04)] border border-white grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
@@ -409,7 +457,6 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {featuredProjects.map((item, index) => {
-            // Richer pastel background colors for project cards
             const bgColors = { sage: '#C8E0D0', rose: '#F0D4D4', sky: '#CBE0F2', lilac: '#E0D4ED', sand: '#EBD8C3' };
             const fallbackColor = '#EBD8C3';
             const itemBg = bgColors[item.color] || fallbackColor;
@@ -554,7 +601,7 @@ function About({ data }) {
           <div className="relative">
              <img src={data.assets.aboutImg} alt="Construction Team" className="relative w-full h-[600px] object-cover rounded-[3rem] shadow-[0_20px_50px_rgb(0,0,0,0.08)]" />
              <div className="absolute -bottom-10 -right-10 bg-white/80 backdrop-blur-md p-4 rounded-full shadow-2xl hidden md:block border border-white">
-                <img src={data.assets.logo} alt="Company Badge" className="w-28 h-28 object-cover rounded-full" />
+                {data.assets.logo ? <img src={data.assets.logo} alt="Company Badge" className="w-28 h-28 object-cover rounded-full" /> : <Building size={40} className="m-8 text-gray-400"/>}
              </div>
           </div>
           <div className="space-y-10 lg:pl-8">
@@ -779,7 +826,7 @@ function AdminDashboard({ data, updateData, logout, showToast }) {
            <div className="bg-white/10 p-5 rounded-full border border-white/10"><Settings size={28} /></div>
            <div>
              <h3 className="font-serif text-3xl tracking-tight">Command Center</h3>
-             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mt-2">Live Sync Active</p>
+             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mt-2">Live Cloud Sync Active</p>
            </div>
         </div>
         <button onClick={logout} className="px-8 py-4 bg-white text-[#1A1C20] hover:bg-gray-100 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-colors w-full sm:w-auto shadow-lg relative z-10">Log Out securely</button>
