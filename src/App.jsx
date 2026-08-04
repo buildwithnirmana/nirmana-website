@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  MapPin, Phone, Mail, Clock,
+  MapPin, Phone, Mail, Clock, 
   Menu as MenuIcon, X, ChevronRight, Calendar, Users, 
   Building, Hammer, HardHat, ChevronLeft, ArrowRight, Settings, Plus, Trash2, 
   Image as ImageIcon, Star, Quote, Ruler, Briefcase, Sparkles, CheckCircle2, ArrowUpRight
@@ -119,8 +119,13 @@ export default function App() {
         <div className={`flex items-center justify-between transition-all duration-1000 ${isScrolled || currentPage !== 'home' ? 'w-full max-w-4xl bg-white/80 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 px-6 py-4 rounded-[3rem]' : 'w-full max-w-7xl px-0 py-2'}`}>
           
           <div className="flex items-center space-x-4 cursor-pointer group" onClick={() => navigateTo('home')}>
-            <div className={`flex items-center justify-center rounded-full transition-all duration-700 ${isScrolled || currentPage !== 'home' ? 'h-12 w-12 bg-[#1A1C20]' : 'h-14 w-14 bg-white shadow-[0_8px_20px_rgb(0,0,0,0.04)]'}`}>
-              <Building size={isScrolled || currentPage !== 'home' ? 20 : 24} className={isScrolled || currentPage !== 'home' ? 'text-white' : 'text-[#1A1C20]'} />
+            <div className={`flex items-center justify-center rounded-full overflow-hidden transition-all duration-700 ${isScrolled || currentPage !== 'home' ? 'h-12 w-12 bg-[#1A1C20]' : 'h-14 w-14 bg-white shadow-[0_8px_20px_rgb(0,0,0,0.04)]'}`}>
+              {/* DYNAMIC LOGO APPLIED HERE */}
+              {siteData.assets.logo ? (
+                <img src={siteData.assets.logo} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                <Building size={isScrolled || currentPage !== 'home' ? 20 : 24} className={isScrolled || currentPage !== 'home' ? 'text-white' : 'text-[#1A1C20]'} />
+              )}
             </div>
             <div className={`text-xl sm:text-2xl font-bold tracking-tight font-serif ${isScrolled || currentPage !== 'home' ? 'text-[#1A1C20]' : 'text-[#1A1C20]'}`}>
               Nirmana.
@@ -253,8 +258,13 @@ export default function App() {
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-16 lg:gap-16 items-start relative z-10">
             <div className="md:col-span-4 flex flex-col items-start space-y-8">
                 <div className="cursor-pointer group flex items-center space-x-4" onClick={() => setShowLogin(true)} title="Admin Access">
-                  <div className="bg-white/10 backdrop-blur-md p-5 rounded-full border border-white/5 group-hover:bg-white/20 transition-all duration-500">
-                    <Building size={26} className="text-white" />
+                  <div className="bg-white/10 backdrop-blur-md w-14 h-14 flex items-center justify-center rounded-full border border-white/5 group-hover:bg-white/20 transition-all duration-500 overflow-hidden">
+                    {/* DYNAMIC LOGO APPLIED HERE */}
+                    {siteData.assets.logo ? (
+                      <img src={siteData.assets.logo} alt="Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      <Building size={26} className="text-white" />
+                    )}
                   </div>
                   <span className="text-3xl font-serif font-bold tracking-tight">Nirmana.</span>
                 </div>
