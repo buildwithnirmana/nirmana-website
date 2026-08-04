@@ -18,6 +18,8 @@ const firebaseConfig = {
   messagingSenderId: "218083070209",
   appId: "1:218083070209:web:ac6b238ff6f896fcb74b00"
 };
+
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -96,18 +98,15 @@ export default function App() {
   useEffect(() => {
     const docRef = doc(db, "nirmana", "websiteData");
     
-    // Listen for changes and update website immediately
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         setSiteData(docSnap.data());
       } else {
-        // First run: setup the database
         setDoc(docRef, INITIAL_DATA);
         setSiteData(INITIAL_DATA);
       }
     }, (error) => {
       console.error("Firestore sync error:", error);
-      showToast("Could not connect to Cloud. Check Firebase keys and rules.", "error");
     });
 
     return () => unsubscribe();
@@ -115,17 +114,14 @@ export default function App() {
 
   // --- SAVE TO CLOUD FUNCTION ---
   const syncData = async (updater) => {
-    // 1. Calculate new data
     const newData = typeof updater === 'function' ? updater(siteData) : updater;
-    // 2. Instantly update UI for speed
     setSiteData(newData);
-    // 3. Send to Google Cloud Database
     try {
       const docRef = doc(db, "nirmana", "websiteData");
       await setDoc(docRef, newData);
     } catch (error) {
       console.error("Failed to save to Cloud:", error);
-      showToast("Failed to save to Cloud. Check your database rules.", "error");
+      showToast("Failed to save to Cloud. Check your database rules or size limits.", "error");
     }
   };
 
@@ -170,7 +166,7 @@ export default function App() {
           
           <div className="flex items-center space-x-4 cursor-pointer group" onClick={() => navigateTo('home')}>
             <div className={`flex items-center justify-center rounded-full overflow-hidden transition-all duration-700 ${isScrolled || currentPage !== 'home' ? 'h-12 w-12 bg-[#1A1C20]' : 'h-14 w-14 bg-white shadow-[0_8px_20px_rgb(0,0,0,0.04)]'}`}>
-              {siteData.assets.logo ? (
+              {siteData.assets?.logo ? (
                 <img src={siteData.assets.logo} alt="Logo" className="w-full h-full object-cover" />
               ) : (
                 <Building size={isScrolled || currentPage !== 'home' ? 20 : 24} className={isScrolled || currentPage !== 'home' ? 'text-white' : 'text-[#1A1C20]'} />
@@ -308,7 +304,7 @@ export default function App() {
             <div className="md:col-span-4 flex flex-col items-start space-y-8">
                 <div className="cursor-pointer group flex items-center space-x-4" onClick={() => setShowLogin(true)} title="Admin Access">
                   <div className="bg-white/10 backdrop-blur-md w-14 h-14 flex items-center justify-center rounded-full border border-white/5 group-hover:bg-white/20 transition-all duration-500 overflow-hidden">
-                    {siteData.assets.logo ? (
+                    {siteData.assets?.logo ? (
                       <img src={siteData.assets.logo} alt="Logo" className="w-full h-full object-cover" />
                     ) : (
                       <Building size={26} className="text-white" />
@@ -371,11 +367,9 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
 
   return (
     <div className="animate-fadeIn">
-      
       {/* Editorial Hero Section */}
       <div className="relative min-h-screen flex items-center justify-center pt-32 pb-16 px-6 lg:px-12 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center w-full">
-          
           <div className="lg:col-span-6 flex flex-col items-start z-10">
             <div className="inline-block px-5 py-2 rounded-full bg-white/60 backdrop-blur-xl border border-white/80 text-[10px] font-bold tracking-[0.25em] uppercase text-gray-500 mb-8 shadow-[0_4px_20px_rgb(0,0,0,0.03)]">
               Premium Architecture & Construction
@@ -395,7 +389,6 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
               </button>
             </div>
           </div>
-
           <div className="lg:col-span-6 relative h-[650px] hidden md:block">
             <div className="absolute right-0 top-12 w-[85%] h-[85%] rounded-[4rem] overflow-hidden shadow-[0_20px_50px_rgb(0,0,0,0.08)] z-20">
                <img src={data.assets.heroBg} alt="Architecture" className="w-full h-full object-cover scale-105" />
@@ -411,7 +404,6 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
         </div>
       </div>
 
-      {/* Modern Approach Section */}
       <div className="py-16 px-6 md:px-12 max-w-7xl mx-auto relative z-10">
         <div className="bg-gradient-to-br from-[#C8E0D0]/90 to-white/60 backdrop-blur-3xl rounded-[5rem] p-12 md:p-20 shadow-[0_10px_40px_rgb(0,0,0,0.04)] border border-white grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
@@ -460,18 +452,15 @@ function Home({ navigateTo, openConsultation, data, updateData, showToast }) {
             const bgColors = { sage: '#C8E0D0', rose: '#F0D4D4', sky: '#CBE0F2', lilac: '#E0D4ED', sand: '#EBD8C3' };
             const fallbackColor = '#EBD8C3';
             const itemBg = bgColors[item.color] || fallbackColor;
-
             return (
               <div key={index} onClick={() => navigateTo('projects')} className="cursor-pointer group flex flex-col relative h-[500px] rounded-[4rem] overflow-hidden shadow-sm hover:shadow-[0_30px_60px_rgb(0,0,0,0.06)] transition-all duration-700 hover:-translate-y-3">
                 <div className="absolute inset-0 transition-opacity duration-700" style={{ backgroundColor: itemBg }}></div>
-                
                 <div className="absolute inset-3 bottom-[38%] rounded-[3.5rem] overflow-hidden">
                   <img src={item.img} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
                   <div className="absolute top-4 left-4">
                      <span className="bg-[#1A1C20]/95 text-white backdrop-blur-md px-4 py-2 rounded-full text-[9px] font-bold uppercase tracking-[0.2em] shadow-xl">{item.category}</span>
                   </div>
                 </div>
-                
                 <div className="absolute bottom-0 left-0 right-0 p-8 h-[38%] flex flex-col justify-end bg-gradient-to-t from-white/90 via-white/50 to-transparent backdrop-blur-[2px]">
                    <div className="bg-white/95 backdrop-blur-xl p-8 rounded-[3rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white transform translate-y-3 group-hover:translate-y-0 transition-transform duration-700">
                      <div className="flex justify-between items-start mb-4">
@@ -545,9 +534,7 @@ function Projects({ data }) {
 
   return (
     <div className="pt-40 pb-24 px-6 md:px-12 max-w-7xl mx-auto animate-fadeIn min-h-screen relative z-10">
-      
       <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-gradient-to-bl from-[#C8E0D0]/50 to-transparent rounded-full blur-[100px] pointer-events-none -z-10"></div>
-
       <div className="text-center mb-12 max-w-4xl mx-auto">
         <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-gray-500 mb-4 block">Our Legacy</span>
         <h1 className="text-6xl md:text-8xl text-[#1A1C20] mb-8 tracking-tighter">Project <span className="font-serif italic font-light text-gray-500">Portfolio.</span></h1>
@@ -601,7 +588,7 @@ function About({ data }) {
           <div className="relative">
              <img src={data.assets.aboutImg} alt="Construction Team" className="relative w-full h-[600px] object-cover rounded-[3rem] shadow-[0_20px_50px_rgb(0,0,0,0.08)]" />
              <div className="absolute -bottom-10 -right-10 bg-white/80 backdrop-blur-md p-4 rounded-full shadow-2xl hidden md:block border border-white">
-                {data.assets.logo ? <img src={data.assets.logo} alt="Company Badge" className="w-28 h-28 object-cover rounded-full" /> : <Building size={40} className="m-8 text-gray-400"/>}
+                {data.assets?.logo ? <img src={data.assets.logo} alt="Company Badge" className="w-28 h-28 object-cover rounded-full" /> : <Building size={40} className="m-8 text-gray-400"/>}
              </div>
           </div>
           <div className="space-y-10 lg:pl-8">
@@ -781,6 +768,11 @@ function AdminDashboard({ data, updateData, logout, showToast }) {
   const handleImageUpload = (e, callback) => {
     const file = e.target.files[0];
     if (file) {
+      // Firebase document limit is 1MB, so we prevent massive Base64 strings.
+      if (file.size > 800000) {
+        showToast("Image is too large! Please select an image under 800KB.", "error");
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => callback(reader.result); 
       reader.readAsDataURL(file);
